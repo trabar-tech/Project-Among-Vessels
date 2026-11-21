@@ -1,0 +1,5 @@
+node_modules/
+tmp/
+.arena/
+.DS_Store
+*.log

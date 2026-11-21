@@ -1,0 +1,26 @@
+{
+  "name": "project-among-vessels",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Project Among Vessels - a browser-native 3D social deduction & emergent survival sandbox (Three.js + Rapier3D).",
+  "license": "Unlicense",
+  "scripts": {
+    "dev": "node tools/dev-server.mjs",
+    "start": "node tools/dev-server.mjs",
+    "vendor": "node tools/sync-vendor.mjs",
+    "verify": "node tools/verify.mjs",
+    "test:logic": "node tools/test-logic.mjs",
+    "test:smoke": "node tools/smoke-test.mjs"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "0.21.0",
+    "three": "0.187.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "jsdom": "25.0.1"
+  }
+}

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <title>Project Among Vessels — ISV Kestrel-90</title>
+    <link rel="stylesheet" href="./styles.css" />
+
+    <!--
+      Dependency resolution without a bundler. Both libraries are vendored in
+      /vendor (see tools/sync-vendor.mjs); nothing is fetched from a CDN.
+    -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three/three.module.js",
+          "three/addons/": "./vendor/three/addons/",
+          "@dimforge/rapier3d-compat": "./vendor/rapier/rapier.mjs"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+
+    <!-- ------------------------------------------------------------- HUD -- -->
+    <div id="hud" class="hidden" aria-hidden="true">
+      <div id="vignette"></div>
+
+      <div id="roomtag">
+        <div id="roomname">SPINE CORRIDOR</div>
+        <div id="roomsub">ISV KESTREL-90 · DECK 1</div>
+      </div>
+
+      <div id="stats" class="hidden"></div>
+
+      <div id="reticle"><span class="dot"></span></div>
+
+      <div id="prompt" class="hidden">
+        <kbd id="prompt-key">E</kbd>
+        <div class="prompttext">
+          <span id="prompt-verb">Use</span>
+          <span id="prompt-label"></span>
+        </div>
+        <div id="prompt-bar" class="hidden"><i></i></div>
+      </div>
+
+      <div id="toast" class="hidden"></div>
+
+      <div id="systems">
+        <div id="circuits"></div>
+        <div id="battery">
+          <span class="label">LAMP</span>
+          <span class="bar"><i></i></span>
+          <span id="battery-pct">100%</span>
+        </div>
+        <div id="keys">
+          <span>WASD move</span><span>SHIFT run</span><span>CTRL crouch</span>
+          <span>E use</span><span>F lamp</span><span>R reset</span><span>F3 stats</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- --------------------------------------------------------- overlays -- -->
+    <div id="overlay">
+      <div class="panel">
+        <div class="brand">MEGACORP ASSET 4471 // CREW TERMINAL</div>
+        <h1 id="overlay-title">PROJECT AMONG VESSELS</h1>
+        <p class="tag">
+          ISV Kestrel-90 &middot; outbound &middot; <strong>8 souls, 7 registered</strong>
+        </p>
+
+        <div id="loading">
+          <div class="bar"><i id="loading-fill"></i></div>
+          <div id="loading-text">spin-up…</div>
+        </div>
+
+        <button id="enter" disabled>LOADING…</button>
+
+        <ul class="controls">
+          <li><kbd>W A S D</kbd> move</li>
+          <li><kbd>Shift</kbd> sprint</li>
+          <li><kbd>Ctrl</kbd> crouch</li>
+          <li><kbd>Space</kbd> jump</li>
+          <li><kbd>E</kbd> interact / pry (hold)</li>
+          <li><kbd>F</kbd> flashlight</li>
+          <li><kbd>R</kbd> reset position</li>
+          <li><kbd>−</kbd> <kbd>=</kbd> exposure</li>
+          <li><kbd>F3</kbd> diagnostics</li>
+          <li><kbd>Esc</kbd> release mouse</li>
+        </ul>
+
+        <p class="foot">
+          Survival is not guaranteed. Neither is the truth.<br />
+          <span class="dim">Milestone 1 build — ship, power, doors, first-person body.</span>
+        </p>
+      </div>
+    </div>
+
+    <div id="error" class="hidden">
+      <div class="errbox">
+        <div class="errhead">SYSTEM FAULTS</div>
+        <pre id="error-text"></pre>
+        <p class="dim">Reload the page. If it repeats, the message above names the module.</p>
+      </div>
+    </div>
+
+    <noscript>
+      <div id="error"><div class="errbox"><div class="errhead">JAVASCRIPT REQUIRED</div></div></div>
+    </noscript>
+
+    <script>
+      // Boot watchdog: installed before any module loads so a failed import
+      // still produces a readable on-screen fault instead of a black page.
+      window.__fatal = function (message, detail) {
+        const box = document.getElementById('error');
+        const text = document.getElementById('error-text');
+        if (!box || !text) return;
+        text.textContent = String(message || 'unknown error') + (detail ? '\n\n' + detail : '');
+        box.classList.remove('hidden');
+      };
+      window.addEventListener('error', function (e) {
+        if (e && e.message) window.__fatal(e.message, (e.filename || '') + ':' + (e.lineno || 0));
+      });
+      window.addEventListener('unhandledrejection', function (e) {
+        const r = e && e.reason;
+        window.__fatal(r && r.message ? r.message : String(r), r && r.stack ? r.stack : '');
+      });
+      setTimeout(function () {
+        if (!window.__BOOTED) {
+          window.__fatal(
+            'Boot timed out after 20s.',
+            'The module graph did not finish loading. Check the console for a 404 or a syntax error.'
+          );
+        }
+      }, 20000);
+    </script>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
