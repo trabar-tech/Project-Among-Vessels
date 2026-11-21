@@ -12,6 +12,7 @@ import { Loop } from './core/loop.js';
 import { Input } from './core/input.js';
 import { createSurfaceTextures } from './render/textures.js';
 import { createMaterials } from './render/materials.js';
+import { createShipEnvironment } from './render/environment.js';
 import { Synth } from './audio/synth.js';
 import { SHIP } from './world/blueprint.js';
 import { buildShip, LightPool } from './world/builder.js';
@@ -76,9 +77,15 @@ async function boot() {
   );
   scene.add(camera);
 
-  // Base fill so unlit corners are readable without a light per room.
-  scene.add(new THREE.AmbientLight(0x2f3d46, 0.34));
-  scene.add(new THREE.HemisphereLight(0x3b4d58, 0x0d0f10, 0.42));
+  // Image-based lighting first: without an environment, the metallic surfaces
+  // have nothing to reflect and read as black no matter how bright the lamps are.
+  scene.environment = createShipEnvironment(renderer);
+  scene.environmentIntensity = 0.75;
+
+  // Then a shallow fill so corners and shadowed bulkheads stay readable.
+  const ambient = new THREE.AmbientLight(0x36464f, 0.42);
+  const hemisphere = new THREE.HemisphereLight(0x46606c, 0x14110f, 0.5);
+  scene.add(ambient, hemisphere);
 
   /* --------------------------------------------------------------- world -- */
   const world = new RAPIER.World({ x: 0, y: CONFIG.GRAVITY, z: 0 });
@@ -288,7 +295,18 @@ async function boot() {
   hud.setStats({ fps: 0, calls: 0, tris: 0, bodies: 0, steps: 0 });
 
   // Expose for debugging and for the verification notes in PROJECT_BRAIN.md.
-  window.__GAME = { THREE, RAPIER, scene, renderer, world, camera, player, power, doors, ship, props, bus, synth, hud, loop };
+  window.__GAME = {
+    THREE, RAPIER, scene, renderer, world, camera, player, power, doors, ship, props, bus, synth, hud, loop,
+    /** Console helper: __GAME.lighting(0.8) dims the whole ship, (1.6) lifts it. */
+    lighting(scale = 1) {
+      scene.environmentIntensity = 0.75 * scale;
+      ambient.intensity = 0.42 * scale;
+      hemisphere.intensity = 0.5 * scale;
+      player.flashlight.intensity = CONFIG.FLASHLIGHT_INTENSITY * scale;
+      for (const f of ship.fixtures) f.baseIntensity = f.originalBaseIntensity * scale;
+      return scale;
+    },
+  };
   window.__BOOTED = true;
   bus.emit('game:ready', { ms: performance.now() });
 

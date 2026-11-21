@@ -50,6 +50,7 @@ src/
     rng.js                  seeded mulberry32 + helpers (deterministic runs)
   render/
     surfacegen.js           pure pixel generators (albedo/roughness/height -> normal), no THREE
+    environment.js          procedural PMREM env map (the reason metal stops reading black)
     textures.js             surfacegen -> CanvasTexture sets, tiling, anisotropy
     materials.js            shared materials, decal/sign/screen textures
   audio/
@@ -61,6 +62,8 @@ src/
     doors.js                sliding door instances, power gating, manual pry
     power.js                circuit state machine, breakers, flicker choreography
     props.js                static set dressing + a few dynamic rigid-body crates
+    decorplan.js            PURE wall-decoration planner (lanes, door/furniture exclusion)
+    decor.js                plan -> 3 merged meshes (vents, conduit, junctions, placards)
     interaction.js          raycast hover registry, prompts, press/hold verbs
   player/
     controller.js           Rapier kinematic character controller, look, bob, flashlight
@@ -231,9 +234,10 @@ with `kind ∈ {blood_debt, corporate_directive, ledger, asset_protection}`.
 ## 6. Verification protocol
 
 1. `npm run verify` — parse every module (`node --check` semantics), resolve every relative import, confirm every bare specifier in `src/` exists in the `index.html` import map, and enforce the layering rules (`render/` may not import `world/`, `core/` may not import anything above it).
-2. `npm run test:logic` — blueprint/grid invariants: no overlapping rooms, every door connected to its declared rooms, no wall run blocking a door opening, lights/consoles/props inside rooms, spawn inside a room; plus surface buffer ranges, determinism, and a PNG contact sheet for eyeballing art.
+2. `npm run test:logic` — blueprint/grid invariants: no overlapping rooms, every door connected to its declared rooms, no wall run blocking a door opening, lights/consoles/props inside rooms, spawn inside a room. Then **layout validation** (every compartment reachable from spawn by BFS over the door graph; every doorway wider than the player capsule and taller than the player; eye height clear of the ceiling), **decoration planner** (contested by doors, consoles, props, signs, spacing, determinism, lane heights, room containment), **prop placement** (no two props intersect, none clip a wall), **budgets** (wall runs, collider estimate, decor count, fixture count, exposure and pixel-ratio sanity); plus surface buffer ranges, determinism, and a PNG contact sheet for eyeballing art.
 3. `npm run test:smoke` — **the one that matters.** jsdom provides a realistic `window`/`document`, Canvas2D is stubbed, and then the *real* ship, props, doors, power, player and Rapier world are built and simulated: the player settles on the deck, walks, opens a powered door by proximity, walks through the doorway into MedBay, is stopped by the same door when unpowered, forces it by prying, and the breaker restores servo power. The HUD is instantiated against the real `index.html` markup so a mismatched element id fails the build.
-4. Live preview — `window.onerror` / `unhandledrejection` and a 20 s boot watchdog are trapped at the top of `index.html` and rendered as a visible red fault panel, so a silent black screen is impossible.
+4. `npm run map:report` — prints the ASCII deck plan, a room table (area, circuit, floor, decor count, door count, BFS hops from spawn), a door table (width, headroom, sides), decoration coverage and rejection histogram, and the budget figures. **It exits non-zero if any layout invariant fails**, so it doubles as a fifth check. `npm run check` runs all five in sequence.
+5. Live preview — `window.onerror` / `unhandledrejection` and a 20 s boot watchdog are trapped at the top of `index.html` and rendered as a visible red fault panel, so a silent black screen is impossible.
 
 ### Why jsdom, and a trap worth remembering
 Rapier's WASM build inspects the JS environment during `init()`. A *partial* `window` stub
@@ -280,9 +284,10 @@ half-environment.**
 
 ### M1 verification log (recorded)
 ```
-npm run verify      -> 27 modules, all checks passed
-npm run test:logic  -> 20 passed, 0 failed
-npm run test:smoke  -> 22 passed, 0 failed
+npm run verify      -> 31 modules, all checks passed
+npm run test:logic  -> 35 passed, 0 failed
+npm run test:smoke  -> 24 passed, 0 failed
+npm run map:report  -> layout OK (exits non-zero on any invariant failure)
 ```
 Measured constants from the real generated ship:
 
@@ -292,6 +297,8 @@ Measured constants from the real generated ship:
 | Wall runs after greedy merge | 32 |
 | Lintels / doors | 6 / 6 |
 | Static colliders | 59 |
+| Decor items (planned) | 50, in 3 merged draw calls |
+| Decor candidates rejected | ~68 (door / furniture / sign / clash) |
 | Merged static-shell draw groups | 9 |
 | Dynamic rigid bodies | 8 |
 | Surface generation (all 6) | ~230–390 ms |
@@ -321,6 +328,9 @@ See §9.
 | D10 | M1 | jsdom (not a hand-rolled DOM stub) for headless runs | A partial `window` makes Rapier's WASM panic in `step()`; see §6 |
 | D11 | M1 | One ORM texture drives both roughness and metalness | three samples `.g` and `.b` respectively — halves texture memory |
 | D12 | M1 | Door power reads the discrete `live` flag, not the flicker level | Otherwise a tripping breaker toggles every door dozens of times per second |
+| D13 | M1.1 | Wall decoration is **derived** from wall runs by `decorplan.js`, never hand-placed | Two hardcoded vents drifted from the geometry and one ended up floating in the Reactor doorway. Derived placement cannot desync |
+| D14 | M1.1 | Procedural PMREM environment map + painted-metal albedo, instead of raising exposure | 0.88-metalness bulkheads with no environment read black; the fix is what the metal reflects, not how long the exposure is cranked. Default stays 1.2 |
+| D15 | M1.1 | Exterior hull walls are decorative surfaces, not excluded | Excluding them starved the planner (4 items for the whole ship); the hull is each room's longest uninterrupted wall |
 
 ---
 
@@ -334,10 +344,15 @@ See §9.
 | K4 | Fixtures and consoles are individual meshes (~90 draw calls) rather than merged | Accepted; well inside budget, will instance if M3 NPCs push the count |
 | K5 | Doors can slide a panel into a player standing in the pocket | Cosmetic; the character controller pushes the player out on the next solve |
 | K6 | Console "use" is flavour text only | By design — tasks arrive with the agenda system in M4 |
+| K7 | Lighting balance is judged by eye in the live preview; the build environment has no GPU | Mitigated by D14 (IBL + painted-metal albedo) and the runtime valves: `−`/`=` and `__GAME.lighting(scale)` |
+| K8 | Decor is decorative only — no colliders, no interaction | Intentional: it is flush to the wall and must never block a doorway. Props are the interactive layer |
 
 ---
 
 ## 10. Next actions
+0. **Lighting check by eye** in the live preview at the default 1.2 exposure: the environment
+   map plus painted-metal albedo should replace the 2.35 exposure the first screenshot needed.
+   `__GAME.lighting(1.4)` lifts everything at once if a room still reads too dark.
 1. **Milestone 2**: prop pickup from the hover transform, throw with inertia, melee sweep
    impulses, knockdown, manual firearm states, and barrel-vector projectiles with CCD.
 2. Tune movement feel against the playtest numbers in `config.js` (walk/sprint acceleration,

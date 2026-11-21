@@ -62,6 +62,8 @@ const { SHIP } = await import('../src/world/blueprint.js');
 const { createSurfaceTextures } = await import('../src/render/textures.js');
 const { createMaterials } = await import('../src/render/materials.js');
 const { buildShip, LightPool } = await import('../src/world/builder.js');
+const decorPlanner = await import('../src/world/decorplan.js');
+const { buildDecor } = await import('../src/world/decor.js');
 const { buildProps } = await import('../src/world/props.js');
 const { Doors } = await import('../src/world/doors.js');
 const { PowerSystem } = await import('../src/world/power.js');
@@ -149,7 +151,8 @@ player.surfaceOf = (id) => roomById.get(id)?.floor ?? 'deck';
 const lightPool = new LightPool({ scene, fixtures: ship.fixtures });
 
 console.log(
-  `  ship: ${ship.stats.cells} cells, ${ship.stats.wallRuns} wall runs, ${ship.stats.colliders} colliders, ${ship.stats.drawGroups} merged draw groups`
+  `  ship: ${ship.stats.cells} cells, ${ship.stats.wallRuns} wall runs, ${ship.stats.colliders} colliders, ${ship.stats.drawGroups} merged draw groups`,
+  `  decor: ${ship.stats.decorPlan.total} items (${Object.entries(ship.stats.decorPlan.byType).map(([k, v]) => `${k} ${v}`).join(', ')}), ${ship.stats.decor.drawCalls} draw calls, ${ship.stats.decorPlan.rejected} rejected`
 );
 console.log(`  props: ${props.dynamic.length} dynamic entries`);
 
@@ -163,6 +166,59 @@ check('static shell is merged, not per-cell', () => {
   assert(mergedNames.length <= 12, `expected <=12 merged shell meshes, got ${mergedNames.length}: ${mergedNames}`);
   assert(mergedNames.includes('walls_hull'), `walls_hull missing (${mergedNames.join(',')})`);
   assert(ship.stats.wallRuns <= 40, `wall runs ${ship.stats.wallRuns}`);
+});
+
+check('wall decoration is generated, merged, and clear of doorways', () => {
+  assert(ship.decorPlan, 'builder did not produce a decor plan');
+  assert(ship.decorPlan.stats.total >= 35, `only ${ship.decorPlan.stats.total} decor items`);
+  assert(ship.decorPlan.stats.byType.vent >= 6, `only ${ship.decorPlan.stats.byType.vent} vents`);
+  const decorGroup = ship.root.getObjectByName('decor');
+  assert(decorGroup, 'decor group missing from the scene graph');
+  const decorMeshes = decorGroup.children.filter((c) => c.isMesh && /^decor_/.test(c.name));
+  assert(decorMeshes.length === 3, `expected 3 merged decor meshes, got ${decorMeshes.length}`);
+  for (const mesh of decorMeshes) {
+    assert(mesh.geometry.attributes.position.count > 40, `${mesh.name} looks empty`);
+  }
+  // The original bug: a vent floating in the reactor doorway.
+  const { doorBandHit } = decorPlanner;
+  for (const item of ship.decorPlan.items) {
+    const hit = doorBandHit(SHIP, item.x, item.z, 0.2);
+    assert(!hit, `${item.type} at (${item.x},${item.z}) sits in ${hit}`);
+  }
+});
+
+check('decor hugs the wall instead of sticking into the room', () => {
+  // Local +Z is the wall normal, so every decor type must stay shallow on Z and
+  // may only be long on X (the wall tangent). This pins the conduit bug: the
+  // first cut rotated the pipe about X and speared 1.5 m into the corridor.
+  const cases = [
+    { type: 'conduit', w: 0.07, h: 0.07, d: 1.5, minX: 1.2, maxZ: 0.3 },
+    { type: 'vent', w: 0.86, h: 0.58, d: 0.09, minX: 0.7, maxZ: 0.2 },
+    { type: 'junction', w: 0.34, h: 0.46, d: 0.11, minX: 0.2, maxZ: 0.2 },
+    { type: 'placard', w: 0.46, h: 0.32, d: 0.03, minX: 0.4, maxZ: 0.1 },
+  ];
+
+  for (const c of cases) {
+    const built = buildDecor({
+      mats,
+      plan: { items: [{ ...c, room: 'TEST', x: 0, y: 2, z: 0, yaw: 0 }] },
+      name: `probe_${c.type}`,
+    });
+    assert(built.meshes.length > 0, `${c.type} produced no geometry`);
+    let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+    for (const mesh of built.meshes) {
+      mesh.geometry.computeBoundingBox();
+      const b = mesh.geometry.boundingBox;
+      minX = Math.min(minX, b.min.x);
+      maxX = Math.max(maxX, b.max.x);
+      minZ = Math.min(minZ, b.min.z);
+      maxZ = Math.max(maxZ, b.max.z);
+    }
+    const spanX = maxX - minX;
+    const spanZ = maxZ - minZ;
+    assert(spanX >= c.minX, `${c.type} only spans ${spanX.toFixed(2)}m along the wall`);
+    assert(spanZ <= c.maxZ, `${c.type} protrudes ${spanZ.toFixed(2)}m out of the wall`);
+  }
 });
 
 check('merged meshes have world-space UVs beyond 0..1', () => {

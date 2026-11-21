@@ -10,6 +10,8 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { buildGrid } from './grid.js';
+import { planDecor } from './decorplan.js';
+import { buildDecor } from './decor.js';
 import { addCubeCollider, applyWorldUV, boxGeo, cylGeo, mergeAll, mesh } from './geom.js';
 
 const C = CONFIG.CELL;
@@ -178,6 +180,7 @@ export function buildShip({ scene, world, RAPIER, mats, ship }) {
       position: new THREE.Vector3(wx, WALL_H - 0.42, wz),
       material: mat,
       baseIntensity: base.emissiveIntensity,
+      originalBaseIntensity: base.emissiveIntensity,
       tone,
       color: tone === 'cold' ? 0xbfe9ff : 0xffdfae,
       phase: Math.random() * Math.PI * 2,
@@ -329,23 +332,14 @@ export function buildShip({ scene, world, RAPIER, mats, ship }) {
   addMerged(root, ribGeos, mats.propMetal, 'ribs');
   stats.drawGroups++;
 
-  /* --------------------------------------------------------- wall vents -- */
-  for (const [x, z, ry] of [
-    [11.86, 7.4, -Math.PI / 2],
-    [8.14, 19.4, Math.PI / 2],
-  ]) {
-    const vent = new THREE.Group();
-    vent.position.set(x, 1.9, z);
-    vent.rotation.y = ry;
-    const plate = mesh(new THREE.BoxGeometry(0.9, 0.62, 0.05), mats.propDark, { cast: false });
-    vent.add(plate);
-    for (let i = 0; i < 5; i++) {
-      const slot = mesh(new THREE.BoxGeometry(0.72, 0.05, 0.03), mats.propMetal, { cast: false });
-      slot.position.set(0, -0.2 + i * 0.1, 0.04);
-      vent.add(slot);
-    }
-    root.add(vent);
-  }
+  /* --------------------------------------------------------------- decor -- */
+  // Decoration is derived from wall runs and validated against doors, consoles,
+  // props and breakers. Nothing here is hand-placed at a raw coordinate.
+  const decorPlan = planDecor({ ship, grid });
+  const decor = buildDecor({ mats, plan: decorPlan, name: 'decor' });
+  root.add(decor.group);
+  stats.decor = decor.stats;
+  stats.decorPlan = decorPlan.stats;
 
   /* -------------------------------------------------------------- lookup -- */
   const roomAt = (wx, wz) => grid.roomAtCell(Math.floor(wx / C), Math.floor(wz / C));
@@ -356,7 +350,7 @@ export function buildShip({ scene, world, RAPIER, mats, ship }) {
     max: box.max.toArray().map((n) => +n.toFixed(1)),
   };
 
-  return { grid, root, fixtures, consoles, staticBody, roomAt, stats };
+  return { grid, root, fixtures, consoles, staticBody, roomAt, stats, decorPlan, decor };
 }
 
 /**
@@ -409,7 +403,7 @@ export class LightPool {
       if (hit) {
         assigned.add(held);
         const glow = power.level(held.circuit);
-        light.userData.target = 8 * glow * (hit.f.baseIntensity / 2.4);
+        light.userData.target = 18 * glow * (hit.f.baseIntensity / 3.0);
       }
     }
     for (const light of this.lights) {
@@ -420,7 +414,7 @@ export class LightPool {
         light.userData.fixture = next.f;
         light.position.copy(next.f.position);
         light.color.setHex(next.f.color);
-        light.userData.target = 8 * next.level * (next.f.baseIntensity / 2.4);
+        light.userData.target = 18 * next.level * (next.f.baseIntensity / 3.0);
         light.intensity = 0; // fade in from the new position
       } else {
         light.userData.fixture = null;

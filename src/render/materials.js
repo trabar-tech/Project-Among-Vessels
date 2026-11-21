@@ -68,14 +68,14 @@ export function createMaterials(surfaces) {
     lampWarm: new THREE.MeshStandardMaterial({
       color: 0x3a352a,
       emissive: 0xffe6b0,
-      emissiveIntensity: 2.4,
+      emissiveIntensity: 3.0,
       metalness: 0.2,
       roughness: 0.4,
     }),
     lampCold: new THREE.MeshStandardMaterial({
       color: 0x2a3335,
       emissive: 0xa8e4ff,
-      emissiveIntensity: 2.0,
+      emissiveIntensity: 2.6,
       metalness: 0.2,
       roughness: 0.4,
     }),

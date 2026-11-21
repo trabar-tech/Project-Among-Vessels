@@ -160,7 +160,7 @@ export const SURFACE_SPECS = {
       o.b = b * 255;
       o.h = 0.58 + bevel * 0.2 + rivet * 0.2 - seam * 0.5 - dirt * 0.05 - scratch * 0.025;
       o.rough = clamp01(0.5 + dirt * 0.3 + rust * 0.2 - scratch * 0.2 - rivet * 0.12);
-      o.metal = clamp01(0.88 - dirt * 0.55 - rust * 0.55 + scratch * 0.08);
+      o.metal = clamp01(0.22 + scratch * 0.5 + rivet * 0.35 - rust * 0.12);
     },
   },
 
@@ -215,7 +215,7 @@ export const SURFACE_SPECS = {
       o.b = b * 255;
       o.h = 0.35 + raised * 0.45 - seam * 0.3 - grime * 0.04;
       o.rough = clamp01(0.62 + grime * 0.24 - raised * 0.28 - scratch * 0.14);
-      o.metal = clamp01(0.78 - grime * 0.45);
+      o.metal = clamp01(0.4 + raised * 0.18 + scratch * 0.3 - grime * 0.22);
     },
   },
 
@@ -254,7 +254,7 @@ export const SURFACE_SPECS = {
       o.b = b * d * 255;
       o.h = solid ? 0.7 + edgeShade * 0.25 : 0.05;
       o.rough = solid ? clamp01(0.55 + grime * 0.3) : 0.95;
-      o.metal = solid ? 0.7 : 0.1;
+      o.metal = solid ? 0.55 : 0.1;
     },
   },
 
@@ -349,7 +349,7 @@ export const SURFACE_SPECS = {
       o.b = b * 255;
       o.h = 0.6 - seam * 0.35 - slot * 0.5;
       o.rough = clamp01(0.78 + stain * 0.15);
-      o.metal = 0.3;
+      o.metal = 0.16;
     },
   },
 
@@ -390,7 +390,7 @@ export const SURFACE_SPECS = {
       o.b = b * 255;
       o.h = 0.6 - seam * 0.45 + boltRow * 0.12 - rust * 0.05;
       o.rough = clamp01(0.55 + rust * 0.25 + soot * 0.2 - scratch * 0.15);
-      o.metal = clamp01(0.8 - rust * 0.45);
+      o.metal = clamp01(0.34 + scratch * 0.35 - rust * 0.18);
     },
   },
 };
