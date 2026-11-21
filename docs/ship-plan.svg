@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1008" height="1752" viewBox="0 0 1008 1752" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+<rect width="1008" height="1752" fill="#08090b"/>
+<text x="64" y="42" fill="#cfd8dc" font-size="20" letter-spacing="2">ISV KESTREL-90 — DECK PLAN</text>
+<text x="64" y="60" fill="#6b7b83" font-size="11" letter-spacing="1">MEGACORP ASSET 4471 // CLASS-C HAULER · 20 × 36 m · 7 compartments · 6 doors · 50 derived fittings</text>
+<g stroke="#14191c" stroke-width="0.5">
+<line x1="64" y1="104" x2="64" y2="1688"/>
+<line x1="152" y1="104" x2="152" y2="1688"/>
+<line x1="240" y1="104" x2="240" y2="1688"/>
+<line x1="328" y1="104" x2="328" y2="1688"/>
+<line x1="416" y1="104" x2="416" y2="1688"/>
+<line x1="504" y1="104" x2="504" y2="1688"/>
+<line x1="592" y1="104" x2="592" y2="1688"/>
+<line x1="680" y1="104" x2="680" y2="1688"/>
+<line x1="768" y1="104" x2="768" y2="1688"/>
+<line x1="856" y1="104" x2="856" y2="1688"/>
+<line x1="944" y1="104" x2="944" y2="1688"/>
+<line x1="64" y1="104" x2="944" y2="104"/>
+<line x1="64" y1="192" x2="944" y2="192"/>
+<line x1="64" y1="280" x2="944" y2="280"/>
+<line x1="64" y1="368" x2="944" y2="368"/>
+<line x1="64" y1="456" x2="944" y2="456"/>
+<line x1="64" y1="544" x2="944" y2="544"/>
+<line x1="64" y1="632" x2="944" y2="632"/>
+<line x1="64" y1="720" x2="944" y2="720"/>
+<line x1="64" y1="808" x2="944" y2="808"/>
+<line x1="64" y1="896" x2="944" y2="896"/>
+<line x1="64" y1="984" x2="944" y2="984"/>
+<line x1="64" y1="1072" x2="944" y2="1072"/>
+<line x1="64" y1="1160" x2="944" y2="1160"/>
+<line x1="64" y1="1248" x2="944" y2="1248"/>
+<line x1="64" y1="1336" x2="944" y2="1336"/>
+<line x1="64" y1="1424" x2="944" y2="1424"/>
+<line x1="64" y1="1512" x2="944" y2="1512"/>
+<line x1="64" y1="1600" x2="944" y2="1600"/>
+<line x1="64" y1="1688" x2="944" y2="1688"/>
+</g>
+<rect x="328" y="104" width="352" height="352" fill="#22333a" stroke="#8fd0e0" stroke-width="2"/>
+<text x="338" y="126" fill="#8fd0e0" font-size="13" letter-spacing="1">BRIDGE</text>
+<text x="338" y="143" fill="#77868d" font-size="10">64 m² · circuit A · deck</text>
+<rect x="416" y="456" width="176" height="1056" fill="#243038" stroke="#7fb6c9" stroke-width="2"/>
+<text x="426" y="478" fill="#7fb6c9" font-size="13" letter-spacing="1">SPINE CORRIDOR</text>
+<text x="426" y="495" fill="#77868d" font-size="10">96 m² · circuit A · deck</text>
+<rect x="64" y="456" width="352" height="264" fill="#1f3630" stroke="#7fd0a8" stroke-width="2"/>
+<text x="74" y="478" fill="#7fd0a8" font-size="13" letter-spacing="1">MEDBAY</text>
+<text x="74" y="495" fill="#77868d" font-size="10">48 m² · circuit B · tile</text>
+<rect x="64" y="896" width="352" height="528" fill="#3a3020" stroke="#d7b06a" stroke-width="2"/>
+<text x="74" y="918" fill="#d7b06a" font-size="13" letter-spacing="1">CARGO HOLD</text>
+<text x="74" y="935" fill="#77868d" font-size="10">96 m² · circuit C · grate</text>
+<rect x="592" y="632" width="352" height="440" fill="#3a2422" stroke="#e08a76" stroke-width="2"/>
+<text x="602" y="654" fill="#e08a76" font-size="13" letter-spacing="1">REACTOR ANNEX</text>
+<text x="602" y="671" fill="#77868d" font-size="10">80 m² · circuit C · deck</text>
+<rect x="592" y="1160" width="352" height="352" fill="#2c2836" stroke="#b3a2d8" stroke-width="2"/>
+<text x="602" y="1182" fill="#b3a2d8" font-size="13" letter-spacing="1">CREW QUARTERS</text>
+<text x="602" y="1199" fill="#77868d" font-size="10">64 m² · circuit B · deck</text>
+<rect x="416" y="1512" width="176" height="176" fill="#332a2a" stroke="#d89a9a" stroke-width="2"/>
+<text x="426" y="1534" fill="#d89a9a" font-size="13" letter-spacing="1">AIRLOCK</text>
+<text x="426" y="1551" fill="#77868d" font-size="10">16 m² · circuit A · deck</text>
+<line x1="325.8" y1="144.26" x2="391.8" y2="144.26" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<circle cx="410.28000000000003" cy="113.67999999999999" r="3" fill="#c88f6a" opacity="0.9"/>
+<line x1="391.7999972621369" y1="417.48655756883494" x2="325.8000027378631" y2="417.51344243116506" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<rect x="618.8" y="442.76" width="8" height="8" fill="none" stroke="#9fc6d8" stroke-width="1.6"/>
+<circle cx="337.68" cy="202.516" r="3" fill="#c88f6a" opacity="0.9"/>
+<rect x="333.24" y="257.476" width="8" height="8" fill="none" stroke="#9fc6d8" stroke-width="1.6"/>
+<circle cx="337.68" cy="360.652" r="3" fill="#c88f6a" opacity="0.9"/>
+<circle cx="670.3199999999999" cy="196.928" r="3" fill="#c88f6a" opacity="0.9"/>
+<circle cx="670.3199999999999" cy="339.532" r="3" fill="#c88f6a" opacity="0.9"/>
+<rect x="419.48" y="658.8" width="8" height="8" fill="none" stroke="#9fc6d8" stroke-width="1.6"/>
+<line x1="456.26672121572193" y1="783.7999993155341" x2="456.25327878427805" y2="717.8000006844658" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<circle cx="425.68" cy="800.3" r="3" fill="#c88f6a" opacity="0.9"/>
+<line x1="454.50672121572194" y1="1311.7999993155343" x2="454.49327878427806" y2="1245.8000006844657" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<circle cx="423.91999999999996" cy="1310.964" r="3" fill="#c88f6a" opacity="0.9"/>
+<circle cx="582.3199999999999" cy="537.268" r="3" fill="#c88f6a" opacity="0.9"/>
+<line x1="553.506721215722" y1="629.8000006844658" x2="553.493278784278" y2="695.7999993155341" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<line x1="553.506721215722" y1="893.8000006844658" x2="553.493278784278" y2="959.7999993155341" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<circle cx="582.3199999999999" cy="1129.2" r="3" fill="#c88f6a" opacity="0.9"/>
+<line x1="553.506721215722" y1="1157.8000006844657" x2="553.493278784278" y2="1223.7999993155343" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<rect x="224.73600000000002" y="461.24" width="8" height="8" fill="none" stroke="#9fc6d8" stroke-width="1.6"/>
+<circle cx="297.2" cy="463.91999999999996" r="2" fill="#e0e0d0" opacity="0.55"/>
+<rect x="90.8" y="706.76" width="8" height="8" fill="none" stroke="#9fc6d8" stroke-width="1.6"/>
+<circle cx="291.216" cy="710.32" r="3" fill="#c88f6a" opacity="0.9"/>
+<circle cx="73.68" cy="522.44" r="3" fill="#c88f6a" opacity="0.9"/>
+<line x1="61.8" y1="936.26" x2="127.8" y2="936.26" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<circle cx="148.56799999999998" cy="905.68" r="3" fill="#c88f6a" opacity="0.9"/>
+<rect x="202.032" y="901.24" width="8" height="8" fill="none" stroke="#9fc6d8" stroke-width="1.6"/>
+<circle cx="298.52" cy="903.92" r="2" fill="#e0e0d0" opacity="0.55"/>
+<line x1="266.9279972621369" y1="1383.726557568835" x2="200.92800273786307" y2="1383.753442431165" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<circle cx="309.168" cy="1416.08" r="2" fill="#e0e0d0" opacity="0.55"/>
+<circle cx="71.92" cy="1135.58" r="2" fill="#e0e0d0" opacity="0.55"/>
+<line x1="104.26672121572194" y1="1264.8519993155342" x2="104.25327878427807" y2="1198.8520006844656" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<circle cx="73.68" cy="1310.568" r="3" fill="#c88f6a" opacity="0.9"/>
+<rect x="618.8" y="637.24" width="8" height="8" fill="none" stroke="#9fc6d8" stroke-width="1.6"/>
+<line x1="704.2" y1="672.26" x2="770.2" y2="672.26" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<circle cx="825.684" cy="641.68" r="3" fill="#c88f6a" opacity="0.9"/>
+<circle cx="598.1600000000001" cy="689.2" r="2" fill="#e0e0d0" opacity="0.55"/>
+<line x1="630.506721215722" y1="959.7999993155341" x2="630.493278784278" y2="893.8000006844658" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<circle cx="934.32" cy="715.424" r="3" fill="#c88f6a" opacity="0.9"/>
+<line x1="903.746721215722" y1="728.9760006844658" x2="903.733278784278" y2="794.9759993155342" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<circle cx="934.32" cy="987.828" r="3" fill="#c88f6a" opacity="0.9"/>
+<rect x="618.8" y="1165.24" width="8" height="8" fill="none" stroke="#9fc6d8" stroke-width="1.6"/>
+<circle cx="670.408" cy="1167.92" r="2" fill="#e0e0d0" opacity="0.55"/>
+<rect x="739.5360000000001" y="1165.24" width="8" height="8" fill="none" stroke="#9fc6d8" stroke-width="1.6"/>
+<circle cx="829.556" cy="1169.6799999999998" r="3" fill="#c88f6a" opacity="0.9"/>
+<line x1="799.0639972621369" y1="1471.726557568835" x2="733.064002737863" y2="1471.753442431165" stroke="#d9c27a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+<circle cx="810.68" cy="1502.3200000000002" r="3" fill="#c88f6a" opacity="0.9"/>
+<circle cx="934.32" cy="1392.232" r="3" fill="#c88f6a" opacity="0.9"/>
+<circle cx="425.68" cy="1552.612" r="3" fill="#c88f6a" opacity="0.9"/>
+<circle cx="584.08" cy="1580.3760000000002" r="2" fill="#e0e0d0" opacity="0.55"/>
+<line x1="64" y1="808" x2="64" y2="984" stroke="#f0e6c8" stroke-width="6" stroke-linecap="butt"/>
+<line x1="152" y1="808" x2="240" y2="808" stroke="#f0e6c8" stroke-width="6" stroke-linecap="butt"/>
+<text x="196" y="812" fill="#141414" font-size="9" text-anchor="middle">MEDBAY</text>
+<line x1="592" y1="808" x2="856" y2="808" stroke="#f0e6c8" stroke-width="6" stroke-linecap="butt"/>
+<text x="724" y="812" fill="#141414" font-size="9" text-anchor="middle">CARGO</text>
+<line x1="328" y1="984" x2="504" y2="984" stroke="#f0e6c8" stroke-width="6" stroke-linecap="butt"/>
+<text x="416" y="988" fill="#141414" font-size="9" text-anchor="middle">REACTOR</text>
+<line x1="856" y1="984" x2="1032" y2="984" stroke="#f0e6c8" stroke-width="6" stroke-linecap="butt"/>
+<text x="944" y="988" fill="#141414" font-size="9" text-anchor="middle">QUARTERS</text>
+<line x1="1120" y1="808" x2="1120" y2="984" stroke="#f0e6c8" stroke-width="6" stroke-linecap="butt"/>
+<circle cx="504" cy="588" r="7" fill="none" stroke="#8fe0b0" stroke-width="2"/>
+<circle cx="504" cy="588" r="2.5" fill="#8fe0b0"/>
+<text x="516" y="592" fill="#8fe0b0" font-size="10">SPAWN</text>
+<rect x="64" y="1714" width="9" height="9" fill="#f0e6c8"/>
+<text x="79" y="1722" fill="#8b989e" font-size="10">doorway</text>
+<rect x="146" y="1714" width="9" height="9" fill="#8fe0b0"/>
+<text x="161" y="1722" fill="#8b989e" font-size="10">spawn</text>
+<rect x="214" y="1714" width="9" height="9" fill="#9fc6d8"/>
+<text x="229" y="1722" fill="#8b989e" font-size="10">vent</text>
+<rect x="275" y="1714" width="9" height="9" fill="#d9c27a"/>
+<text x="290" y="1722" fill="#8b989e" font-size="10">conduit</text>
+<rect x="357" y="1714" width="9" height="9" fill="#c88f6a"/>
+<text x="372" y="1722" fill="#8b989e" font-size="10">junction</text>
+<rect x="446" y="1714" width="9" height="9" fill="#e0e0d0"/>
+<text x="461" y="1722" fill="#8b989e" font-size="10">placard</text>
+</svg>
