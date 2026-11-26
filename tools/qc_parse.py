@@ -38,7 +38,16 @@ RENDER_DEFAULTS = {
     "TOPIC": "WHERE",
     "SABOTAGE": "LIGHTS",
     "TASKS": "none",
+    "ROLE": "TECH",
+    "CLEARANCE": "C",
+    "BERTH": "DECK_C",
+    "SRC": "unknown",
+    "DST": "unknown",
+    "COVERS": "nobody",
 }
+
+# Slots that hold a *person reference* rather than a vocabulary value.
+GENERIC_SLOTS = ("TARGET", "SPEAKER", "SRC", "DST", "COVERS")
 
 SLOT_TO_VOCAB = {
     "LOCATION": "LOCATIONS",
@@ -49,6 +58,9 @@ SLOT_TO_VOCAB = {
     "TOPIC": "TOPIC",
     "SABOTAGE": "SABOTAGE",
     "TASKS": "TASKS",
+    "ROLE": "ROLES",
+    "CLEARANCE": "CLEARANCE",
+    "BERTH": "BERTHS",
 }
 
 
@@ -97,11 +109,24 @@ def parse_utterance(text: str, speaker: str, grammar: dict) -> dict:
     # Vocabulary checks (only for slots that are vocabularies).
     vocabs = grammar["vocabularies"]
     for key, value in slots.items():
+        if key in GENERIC_SLOTS:  # person names are free-form; checked for
+            continue              # self-reference separately below
         vocab_name = SLOT_TO_VOCAB.get(key)
         if vocab_name and vocab_name in vocabs and value not in vocabs[vocab_name]:
             raise ParseError(f"value '{value}' for {key} not in vocabulary {vocabs[vocab_name]}")
-    # Constraints.
+    # Evidence-token restrictions: an identity challenge may only cite tokens
+    # that actually constitute identity evidence. This is a grammar-level ban
+    # on "you vented, so your papers are fake" reasoning.
     cons = grammar.get("constraints", {})
+    if utype == "IDENTITY_CHALLENGE" and "EVIDENCE" in slots:
+        allowed = cons.get("identity_challenge_tokens")
+        if allowed and slots["EVIDENCE"] not in allowed:
+            raise ParseError(f"IDENTITY_CHALLENGE may only cite {allowed}, got {slots['EVIDENCE']}")
+    if utype == "MANIFEST_CITE" and "EVIDENCE" in slots:
+        allowed = cons.get("manifest_tokens")
+        if allowed and slots["EVIDENCE"] not in allowed:
+            raise ParseError(f"MANIFEST_CITE may only cite {allowed}, got {slots['EVIDENCE']}")
+    # Constraints.
     if cons.get("speaker_ne_target") and slots.get("TARGET", "").lower() == speaker.lower():
         raise ParseError("speaker cannot target themselves (except via DEFEND/ALIBI semantics at runtime)")
     # Suspicion delta.
@@ -110,7 +135,8 @@ def parse_utterance(text: str, speaker: str, grammar: dict) -> dict:
         delta = 0.35
     target = slots.get("TARGET")
     # For ALIBI/DEFEND the delta applies to speaker/self; for others to TARGET.
-    delta_target = speaker if utype in ("ALIBI", "DEFEND") else target
+    # ALIBI/DEFEND/IDENTITY_CLAIM are statements about the speaker.
+    delta_target = speaker if utype in ("ALIBI", "DEFEND", "IDENTITY_CLAIM") else target
     # Fill every placeholder the template may reference; optional slots that
     # were not supplied render as their neutral default so a valid short form
     # (e.g. VOTE_INTENT with no TARGET = skip) never crashes rendering.
@@ -140,11 +166,18 @@ def validate_grammar(grammar: dict) -> list[str]:
         for slot in spec["slots"]:
             # Slots that look like vocabularies must exist as vocabularies,
             # except TARGET/SPEAKER which are player names.
-            if slot in ("TARGET", "SPEAKER"):
+            if slot in GENERIC_SLOTS:
                 continue
             vocab_name = SLOT_TO_VOCAB.get(slot)
             if not vocab_name or vocab_name not in vocabs:
                 problems.append(f"{name}: slot {slot} has no vocabulary entry")
+        # Any restricted-token list must draw from the EVIDENCE vocabulary.
+        evidence = set(vocabs.get("EVIDENCE", []))
+        for key, allowed in grammar.get("constraints", {}).items():
+            if key.endswith("_tokens"):
+                bad = [tok for tok in allowed if tok not in evidence]
+                if bad:
+                    problems.append(f"constraint {key} references non-EVIDENCE tokens {bad}")
         # Render template must reference only known placeholders.
         placeholders = {"SPEAKER": "X", "TARGET": "Y"}
         for slot in spec["slots"]:
@@ -186,8 +219,12 @@ def fuzz(grammar: dict, count: int, seed: int) -> int:
         for slot, req in spec["slots"].items():
             if req != "required" and rng.random() < 0.5:
                 continue
-            if slot == "TARGET":
+            if slot in GENERIC_SLOTS:
                 value = rng.choice(["Blue", "Green", "Pink", "Yellow"])
+            elif utype == "IDENTITY_CHALLENGE" and slot == "EVIDENCE":
+                value = rng.choice(grammar["constraints"]["identity_challenge_tokens"])
+            elif utype == "MANIFEST_CITE" and slot == "EVIDENCE":
+                value = rng.choice(grammar["constraints"]["manifest_tokens"])
             elif SLOT_TO_VOCAB.get(slot) in vocabs:
                 value = rng.choice(vocabs[SLOT_TO_VOCAB[slot]])
             else:

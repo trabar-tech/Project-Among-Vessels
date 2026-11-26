@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Among Vessels — 3D slice</title>
+    <style>
+      :root {
+        --alarm: #ff4a1f;
+        --steel: #7f8f94;
+        --ink: #0a0d0e;
+        --amber: #c9a227;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; background: #05070a; overflow: hidden; }
+      body { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: #b9c6c9; }
+      canvas { display: block; }
+
+      /* CRT framing: scanlines + vignette, per 03 §2.1 */
+      #crt {
+        position: fixed; inset: 0; pointer-events: none; z-index: 10;
+        background:
+          repeating-linear-gradient(to bottom, rgba(0,0,0,0.22) 0 1px, transparent 1px 3px),
+          radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,0.78) 100%);
+        mix-blend-mode: multiply;
+      }
+      #hud {
+        position: fixed; inset: 0; pointer-events: none; z-index: 11;
+        padding: 18px 22px; display: flex; flex-direction: column; justify-content: space-between;
+        text-transform: uppercase; letter-spacing: 0.14em; font-size: 11px;
+        text-shadow: 0 0 6px rgba(0,0,0,0.9);
+      }
+      .row { display: flex; gap: 26px; align-items: baseline; }
+      .stamp {
+        border: 1px solid rgba(127,143,148,0.45); padding: 2px 8px;
+        background: rgba(6,9,11,0.55); color: var(--steel);
+      }
+      .alarm { color: var(--alarm); border-color: rgba(255,74,31,0.6); }
+      #prompt { color: var(--amber); }
+      #console {
+        position: fixed; right: 22px; top: 74px; width: 340px; z-index: 12;
+        font-size: 11px; line-height: 1.65; color: #8fa0a4;
+        background: rgba(5,8,10,0.72); border-left: 2px solid rgba(255,74,31,0.35);
+        padding: 10px 12px; max-height: 46vh; overflow: hidden;
+        text-transform: uppercase; letter-spacing: 0.08em;
+      }
+      #console .line { opacity: 0; animation: fadein 0.4s forwards; }
+      #console .say { color: #cfd9db; }
+      #console .bad { color: var(--alarm); }
+      @keyframes fadein { to { opacity: 1; } }
+      #panic { position: fixed; inset: 0; z-index: 9; pointer-events: none; opacity: 0;
+               background: radial-gradient(ellipse at center, transparent 35%, rgba(255,74,31,0.35) 100%); }
+    </style>
+  </head>
+  <body>
+    <div id="crt"></div>
+    <div id="panic"></div>
+    <div id="hud">
+      <div class="row">
+        <span class="stamp" id="ship">VESSEL // KESTREL-9</span>
+        <span class="stamp" id="phase">PLAY</span>
+        <span class="stamp" id="tasks">TASKS 0/24</span>
+        <span class="stamp" id="crew">CREW 10</span>
+      </div>
+      <div class="row">
+        <span id="prompt">WASD MOVE · SHIFT SPRINT · E TASK · R REPORT · SPACE MEETING</span>
+        <span class="stamp" id="moodle">FOCUSED</span>
+      </div>
+    </div>
+    <div id="console"></div>
+    <script type="module" src="/src/render/main.ts"></script>
+  </body>
+</html>

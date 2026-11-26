@@ -4,8 +4,12 @@
 Canonical data: [`tools/data/quickchat_grammar.json`](tools/data/quickchat_grammar.json) — **if this doc and the JSON disagree, the JSON wins**
 Executable spec: [`tools/qc_parse.py`](tools/qc_parse.py) · Requires: [04_AI_ARCHITECTURE.md](04_AI_ARCHITECTURE.md) §7
 
-> A closed, formal language for NPC testimony. 15 utterance types, 8 vocabularies, one parse function,
-> deterministic suspicion math. **No free-form LLM text is generated during gameplay** — ever.
+> A closed, formal language for NPC testimony. **18 utterance types, 11 vocabularies**, one parse
+> function, deterministic suspicion math. **No free-form LLM text is generated during gameplay** — ever.
+>
+> *v0.2.0 addition:* three identity types (`IDENTITY_CLAIM`, `IDENTITY_CHALLENGE`, `MANIFEST_CITE`)
+> and four evidence tokens (`BADGE_MISMATCH`, `MANIFEST_GAP`, `NO_WORK_ORDER`, `SEAL_TAMPER`), because
+> an impostor is a person with someone else's papers — see [06_IDENTITY_AND_PASSING.md](06_IDENTITY_AND_PASSING.md).
 
 ---
 
@@ -117,6 +121,53 @@ TASK       ::= FixWiring | SwipeCard | ClearAsteroids | SubmitScan | FuelEngines
 **Why 3 utterances max.** A speaker who can say unlimited things can flood the meeting and dominate
 suspicion by volume. Three is enough for "report + accuse + defend", and forces *prioritisation* —
 which is the strategic content of a meeting.
+
+---
+
+## 2a. Identity Types (v0.2.0)
+
+The passing-impostor reframing ([06](06_IDENTITY_AND_PASSING.md)) adds a second evidence economy:
+**paperwork**. It must not be mixed with the guilt economy, and the grammar enforces that separation
+at parse time.
+
+| Type | Slots | Semantic tag | Base Δ | Restriction |
+|---|---|---|---|---|
+| `IDENTITY_CLAIM` | ROLE (req), CLEARANCE, BERTH | `CLAIM:COVER(self)` | −0.05 to self | Must match the speaker's cover record |
+| `IDENTITY_CHALLENGE` | TARGET, EVIDENCE (req) | `CLAIM:ILLEGAL(target)` | +0.45 | EVIDENCE ∈ {`BADGE_MISMATCH`, `SEAL_TAMPER`, `NO_WORK_ORDER`, `MANIFEST_GAP`} |
+| `MANIFEST_CITE` | TARGET, EVIDENCE (req) | `CLAIM:RECORD_CONTRADICTS(target)` | +0.50 | EVIDENCE ∈ {`MANIFEST_GAP`, `NO_WORK_ORDER`, `BADGE_MISMATCH`} |
+
+**The restriction is the design.** You cannot challenge someone's papers because they were standing
+near a body — that is guilt evidence, and it lives in a different ledger. The parser refuses:
+
+```
+$ python3 tools/qc_parse.py parse "IDENTITY_CHALLENGE TARGET=Blue EVIDENCE=VENT" --speaker Red
+PARSE ERROR: IDENTITY_CHALLENGE may only cite ['BADGE_MISMATCH', 'SEAL_TAMPER',
+             'NO_WORK_ORDER', 'MANIFEST_GAP'], got VENT
+```
+
+**Why this matters mechanically.** It produces the situation the whole design exists for: a crewmate
+can be *proven* a murderer and *simultaneously* hold genuine papers — which means someone with ledger
+access supplied them, and the investigation is not over. Two economies, one meeting.
+
+### 2b. Updated base-delta ranking (all 18 types)
+
+| Rank | Type | Δ |
+|---|---|---|
+| 1 | `KILL_WITNESS` | +0.90 |
+| 2 | `VENT_SIGHTING` | +0.85 |
+| 3 | `MANIFEST_CITE` | **+0.50** |
+| 4 | `IDENTITY_CHALLENGE` | **+0.45** |
+| 5 | `ACCUSE` | +0.30 |
+| 6 | `SABOTAGE_WITNESS` | +0.25 |
+| 7 | `SUSPICION` (MILD / STRONG) | +0.20 / +0.35 |
+| 8 | `CLEAR` | −0.40 |
+| 9 | `ALIBI` | −0.15 |
+| 10 | `DEFEND` | −0.10 |
+| 11 | `IDENTITY_CLAIM` | **−0.05** |
+
+Note the ordering: **paperwork outranks hearsay but never outranks an eyewitness.** A manifest
+anomaly is stronger evidence than an accusation, weaker than seeing a kill — which is the correct
+epistemic hierarchy for a bureaucracy that can be poisoned.
 
 ---
 

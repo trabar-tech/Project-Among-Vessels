@@ -1,10 +1,15 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "status": "locked-for-phase-2",
-  "description": "Launch balance defaults. Mirrored in prose in 02_AMONG_US_CORE.md §8 and 03_HYBRID_MECHANICS.md §7. Values are starting points for sim_headless.py sweeps, not final tuning.",
+  "description": "Launch balance defaults. Mirrored in prose in 02_AMONG_US_CORE.md \u00a78 and 03_HYBRID_MECHANICS.md \u00a77. Values are starting points for sim_headless.py sweeps, not final tuning.",
   "players": 10,
   "impostors": 2,
-  "tasks": {"common": 2, "long": 2, "short": 2, "total_per_crewmate": 6},
+  "tasks": {
+    "common": 2,
+    "long": 2,
+    "short": 2,
+    "total_per_crewmate": 6
+  },
   "kill_cooldown_seconds": 27.5,
   "kill_distance": "short",
   "sabotage_cooldown_seconds": 20,
@@ -21,5 +26,19 @@
   "confirm_ejects": false,
   "anonymous_votes": true,
   "visual_tasks": false,
-  "director": {"dread_decay_per_second": 0.02, "dread_peak_threshold": 1.0, "hint_interval_seconds": 20}
+  "director": {
+    "dread_decay_per_second": 0.02,
+    "dread_peak_threshold": 1.0,
+    "hint_interval_seconds": 20
+  },
+  "identity": {
+    "manifest_check_cost_seconds": 4.0,
+    "manifest_check_cooldown_seconds": 60,
+    "manifest_checks_per_round": 2,
+    "false_papers_quality": 0.55,
+    "challenge_base_delta": 0.45,
+    "manifest_cite_base_delta": 0.5,
+    "credibility_decay_per_challenge": 0.2,
+    "clean_manifest_win_requires_all_illegal_found": true
+  }
 }

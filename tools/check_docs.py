@@ -37,6 +37,8 @@ REQUIRED_HEADINGS = {
     "03_HYBRID_MECHANICS.md": ["03", "SIGNALIS", "Project Zomboid"],
     "04_AI_ARCHITECTURE.md": ["04", "GOAP", "Director"],
     "05_QUICKCHAT_GRAMMAR.md": ["05", "Grammar", "Suspicion"],
+    "06_IDENTITY_AND_PASSING.md": ["06", "Cover System", "True Impostors"],
+    "07_ENGINE_AND_3D.md": ["07", "Engine Decision", "Presentation Contract"],
 }
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 HEADING_RE = re.compile(r"^#{1,6}\s+.*$", re.MULTILINE)
@@ -89,7 +91,8 @@ def main(argv: list[str] | None = None) -> int:
         for prob in problems:
             print(f"ERROR: {prob}", file=sys.stderr)
         return 1
-    print(f"docs OK: {len(REQUIRED)} required docs present, internal links resolve")
+    print(f"docs OK: {len(REQUIRED)} required docs present, internal links resolve, "
+          f"required headings present")
     return 0
 
 

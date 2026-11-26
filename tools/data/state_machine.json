@@ -1,22 +1,105 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "status": "locked-for-phase-2",
-  "description": "Game phase state machine. Consumed by tools/validate_state.py. Mirrored in prose in 02_AMONG_US_CORE.md §3.",
-  "phases": ["LOBBY", "BRIEFING", "PLAY", "MEETING_DISCUSSION", "MEETING_VOTING", "EJECTION", "GAME_OVER_CREW_TASK_WIN", "GAME_OVER_CREW_EJECT_WIN", "GAME_OVER_IMPOSTOR_PARITY", "GAME_OVER_IMPOSTOR_SABOTAGE"],
-  "terminal_phases": ["GAME_OVER_CREW_TASK_WIN", "GAME_OVER_CREW_EJECT_WIN", "GAME_OVER_IMPOSTOR_PARITY", "GAME_OVER_IMPOSTOR_SABOTAGE"],
+  "description": "Game phase state machine. Consumed by tools/validate_state.py. Mirrored in prose in 02_AMONG_US_CORE.md \u00a73.",
+  "phases": [
+    "LOBBY",
+    "BRIEFING",
+    "PLAY",
+    "MANIFEST_CHECK",
+    "MEETING_DISCUSSION",
+    "MEETING_VOTING",
+    "EJECTION",
+    "GAME_OVER_CREW_TASK_WIN",
+    "GAME_OVER_CREW_EJECT_WIN",
+    "GAME_OVER_IMPOSTOR_PARITY",
+    "GAME_OVER_IMPOSTOR_SABOTAGE",
+    "GAME_OVER_CREW_CLEAN_MANIFEST"
+  ],
+  "terminal_phases": [
+    "GAME_OVER_CREW_TASK_WIN",
+    "GAME_OVER_CREW_EJECT_WIN",
+    "GAME_OVER_IMPOSTOR_PARITY",
+    "GAME_OVER_IMPOSTOR_SABOTAGE",
+    "GAME_OVER_CREW_CLEAN_MANIFEST"
+  ],
   "initial_phase": "LOBBY",
   "transitions": [
-    {"from": "LOBBY", "to": "BRIEFING", "guard": "player_count >= 4 and impostor_count >= 1 and impostor_count < player_count / 2"},
-    {"from": "BRIEFING", "to": "PLAY", "guard": "roles_assigned and tasks_assigned"},
-    {"from": "PLAY", "to": "MEETING_DISCUSSION", "guard": "body_reported or emergency_button_pressed"},
-    {"from": "PLAY", "to": "GAME_OVER_CREW_TASK_WIN", "guard": "all_crewmate_tasks_complete"},
-    {"from": "PLAY", "to": "GAME_OVER_IMPOSTOR_PARITY", "guard": "alive_impostors >= alive_crewmates"},
-    {"from": "PLAY", "to": "GAME_OVER_IMPOSTOR_SABOTAGE", "guard": "crisis_countdown_expired"},
-    {"from": "MEETING_DISCUSSION", "to": "MEETING_VOTING", "guard": "discussion_timer_expired"},
-    {"from": "MEETING_VOTING", "to": "EJECTION", "guard": "voting_timer_expired or all_votes_cast"},
-    {"from": "EJECTION", "to": "PLAY", "guard": "no_ejection_or_ejected_player_not_last_impostor"},
-    {"from": "EJECTION", "to": "GAME_OVER_CREW_EJECT_WIN", "guard": "alive_impostors == 0"},
-    {"from": "EJECTION", "to": "GAME_OVER_IMPOSTOR_PARITY", "guard": "alive_impostors >= alive_crewmates"}
+    {
+      "from": "LOBBY",
+      "to": "BRIEFING",
+      "guard": "player_count >= 4 and impostor_count >= 1 and impostor_count < player_count / 2"
+    },
+    {
+      "from": "BRIEFING",
+      "to": "PLAY",
+      "guard": "roles_and_covers_assigned"
+    },
+    {
+      "from": "PLAY",
+      "to": "MEETING_DISCUSSION",
+      "guard": "body_reported or emergency_button_pressed"
+    },
+    {
+      "from": "PLAY",
+      "to": "MANIFEST_CHECK",
+      "guard": "manifest_terminal_used_and_check_available"
+    },
+    {
+      "from": "MANIFEST_CHECK",
+      "to": "PLAY",
+      "guard": "check_resolved"
+    },
+    {
+      "from": "PLAY",
+      "to": "GAME_OVER_CREW_TASK_WIN",
+      "guard": "all_crewmate_tasks_complete"
+    },
+    {
+      "from": "PLAY",
+      "to": "GAME_OVER_CREW_CLEAN_MANIFEST",
+      "guard": "all_illegal_personnel_identified"
+    },
+    {
+      "from": "PLAY",
+      "to": "GAME_OVER_IMPOSTOR_PARITY",
+      "guard": "alive_impostors >= alive_crewmates"
+    },
+    {
+      "from": "PLAY",
+      "to": "GAME_OVER_IMPOSTOR_SABOTAGE",
+      "guard": "crisis_countdown_expired"
+    },
+    {
+      "from": "MEETING_DISCUSSION",
+      "to": "MEETING_VOTING",
+      "guard": "discussion_timer_expired"
+    },
+    {
+      "from": "MEETING_VOTING",
+      "to": "EJECTION",
+      "guard": "voting_timer_expired or all_votes_cast"
+    },
+    {
+      "from": "EJECTION",
+      "to": "PLAY",
+      "guard": "no_ejection_or_ejected_player_not_last_illegal"
+    },
+    {
+      "from": "EJECTION",
+      "to": "GAME_OVER_CREW_EJECT_WIN",
+      "guard": "alive_impostors == 0"
+    },
+    {
+      "from": "EJECTION",
+      "to": "GAME_OVER_CREW_CLEAN_MANIFEST",
+      "guard": "alive_illegal_personnel == 0"
+    },
+    {
+      "from": "EJECTION",
+      "to": "GAME_OVER_IMPOSTOR_PARITY",
+      "guard": "alive_impostors >= alive_crewmates"
+    }
   ],
   "invariants": [
     "alive_impostors < player_count",

@@ -1,2 +1,7 @@
+node_modules/
+dist/
+engine/dist/
+engine/node_modules/
 __pycache__/
 *.pyc
+.DS_Store

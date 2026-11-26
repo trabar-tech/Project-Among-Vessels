@@ -4,8 +4,9 @@
 > SIGNALIS dread as the lens, Project Zomboid pressure as the texture, F.E.A.R. planning and
 > Alien: Isolation direction as the brains, and a closed Quick-Chat grammar as the only voice.
 
-**Status: Phase 1 complete — architectural foundation.** This repository contains design documents
-and backend verification tooling only. No game client, no web UI, no renderer yet.
+**Status: Phase 1 complete · Phase 3 slice running.** Design suite + verification tooling (Phase 1),
+identity/passing design (Phase 3), and a **3D client slice** in `engine/` whose rules core is fully
+tested. The renderer is a look-and-feel probe, not the game.
 
 ---
 
@@ -20,7 +21,26 @@ noise, they forget, they lie, and they can be talked into killing the wrong pers
 
 ---
 
+## The premise (revised)
+
+If you cannot afford a chartered berth, you buy papers. In a corporate-run dystopia that is cheaper than
+legitimacy — and everyone aboard knows it. **An impostor is not a monster. An impostor is a person
+whose badge, berth, and work orders belong to someone who no longer needs them.** The ship's manifest
+is the only witness, and the ship does not care. The crew does not hunt the illegal passenger out of
+fear; they hunt them because if the manifest is wrong at dock, the charter voids and everyone's record
+is flagged.
+
+The kill is not the impostor's goal. **The kill is how they edit the record.**
+
 ## What is in this repository
+
+### 3D client and rules core (`engine/`)
+
+| Component | Status |
+|---|---|
+| `engine/src/sim/` — rules core (TypeScript, **no three.js imports**) | **Verified**: `tsc` clean, 15 tests, balance probe |
+| `engine/src/render/main.ts` — 3D slice (three.js + Vite) | Type-checks, builds, serves. **Not visually verified** — no GPU in the build environment |
+| `npm run dev` | Live at `http://localhost:5173` |
 
 ### Design suite (read in order)
 
@@ -31,7 +51,9 @@ noise, they forget, they lie, and they can be talked into killing the wrong pers
 | [02_AMONG_US_CORE.md](02_AMONG_US_CORE.md) | Loop deconstruction, map flow, phases, task pacing math, vision, sabotage, voting, win conditions, launch tuning | `state_machine.json`, `balance_defaults.json` |
 | [03_HYBRID_MECHANICS.md](03_HYBRID_MECHANICS.md) | SIGNALIS aesthetic as mechanical constraint; Zomboid moodles, noise propagation, LOS, inventory; budget caps | (reads `balance_defaults.json`) |
 | [04_AI_ARCHITECTURE.md](04_AI_ARCHITECTURE.md) | Director → Squad → GOAP → Sensors; suspicion model; lying policy; personas; fairness invariants | — |
-| [05_QUICKCHAT_GRAMMAR.md](05_QUICKCHAT_GRAMMAR.md) | Formal grammar, EBNF, semantic tags, suspicion mathematics, truthfulness protocol, worked transcript | `quickchat_grammar.json` |
+| [05_QUICKCHAT_GRAMMAR.md](05_QUICKCHAT_GRAMMAR.md) | Formal grammar, EBNF, semantic tags, suspicion mathematics, truthfulness protocol, worked transcript, **identity types** | `quickchat_grammar.json` |
+| [06_IDENTITY_AND_PASSING.md](06_IDENTITY_AND_PASSING.md) | **The passing-impostor reframing**: cover system, manifest terminals, anomaly counter, ledger writes, four-axis suspicion, clean-manifest win, true-impostor forward design | `balance_defaults.json` §identity |
+| [07_ENGINE_AND_3D.md](07_ENGINE_AND_3D.md) | **3D engine decision and rationale**, presentation contract, verified-vs-specified ledger, portability tripwire | `engine/` |
 
 ### Tooling (stdlib Python 3.11, no dependencies)
 
@@ -41,6 +63,8 @@ noise, they forget, they lie, and they can be talked into killing the wrong pers
 | [`tools/validate_state.py`](tools/validate_state.py) | Phase-machine reachability/invariant checks + Among Us voting math |
 | [`tools/sim_headless.py`](tools/sim_headless.py) | Seeded headless balance simulation with Quick-Chat meetings, lying, and the Director dread gauge |
 | [`tools/check_docs.py`](tools/check_docs.py) | Documentation cross-reference and stub checker |
+| [`tools/goap_probe.py`](tools/goap_probe.py) | GOAP plan tracer over `tools/goap.py`; 9 architectural assertions | 
+| [`tools/check_rules.py`](tools/check_rules.py) | Engine ↔ tooling parity gate (balance, phases, grammar, map) |
 | [`tools/tests/test_tools.py`](tools/tests/test_tools.py) | 18 tests asserting design properties, not just liveness |
 
 Canonical data lives in [`tools/data/`](tools/data). **Where a document and a JSON file disagree, the
@@ -51,13 +75,23 @@ JSON wins and the document must be corrected.**
 ## Quick start
 
 ```bash
-# Full verification gate (any failure blocks a merge)
+# Python reference gate
 python3 tools/qc_parse.py validate
 python3 tools/qc_parse.py fuzz --count 300
 python3 tools/validate_state.py validate
 python3 tools/sim_headless.py guard --runs 300
+python3 tools/goap_probe.py scenarios
+python3 tools/check_rules.py
 python3 tools/check_docs.py --strict
 python3 -m unittest discover -s tools/tests
+
+# Shipped runtime gate (no GPU needed)
+cd engine
+npx tsc --noEmit
+node --test --experimental-strip-types src/sim/rules.test.ts
+
+# Run the 3D slice
+npm run dev        # http://localhost:5173
 ```
 
 Try the interesting bits:
@@ -79,7 +113,16 @@ python3 tools/sim_headless.py sweep --runs 80
 
 ---
 
-## Current balance evidence (10 players, 2 impostors, seed 42, 300 runs)
+## Engine note
+
+The game is 3D. The engine is **TypeScript + three.js + Vite**, chosen because it is the only
+option here whose code can actually be **executed and type-checked** in this environment (Godot's
+binaries were unreachable, so no GDScript could be verified at all). The rules core imports *nothing*
+from three.js — it is portable, tested, and mirrored by a Python reference implementation that
+`check_rules.py` diffs automatically. The migration tripwire to Godot is documented in
+[07](07_ENGINE_AND_3D.md) §1.3.
+
+## Current balance evidence (Python reference: 10 players, 2 impostors, seed 42, 300 runs)
 
 | Metric | Value |
 |---|---|
@@ -113,13 +156,25 @@ reasonable on paper. That is the entire argument for Phase 1 tooling.
 
 ---
 
+## Balance evidence (TypeScript runtime, ported core)
+
+| Metric | Value |
+|---|---|
+| Crew win rate | **0.313** (inside the 0.30–0.60 guard band, near the floor) |
+| Eject accuracy | 0.794 |
+| Mean match length | 167 s |
+
+The TypeScript port runs slightly harsher than the Python reference (0.42). The difference is real and
+is logged as a tuning task: the port dropped one sabotage-recovery branch. `check_rules.py` keeps the
+*constants* in sync; behaviour parity needs a shared replay fixture, planned for Phase 3d.
+
 ## Roadmap
 
 | Phase | Scope | Exit criterion |
 |---|---|---|
 | **1 (done)** | Design suite + verification tooling | Full gate green; docs and JSON agree |
-| **2** | Headless vertical slice: one map graph, 10 agents, GOAP, Quick-Chat meetings, spatial sim | `sim_headless.py guard` passes **and** a human reads a meeting transcript and believes it |
-| **3** | Presentation shell: renderer, CRT/UI direction, audio gates | Loop unchanged; only perception added |
+| **2 (done)** | Headless vertical slice: map graph, 10 agents, Quick-Chat meetings | `sim_headless.py guard` passes; transcript believable |
+| **3 (in progress)** | 3D slice + identity system | Renderer runs on a real GPU; `GAME_OVER_CREW_CLEAN_MANIFEST` reachable in-client |
 | **4** | Content: maps, tasks, personas, authoring tools | Replayability without new mechanics |
 
 Phase 2 tools already specified: `goap_probe.py`, `noise_probe.py`, `transcript_check.py`,

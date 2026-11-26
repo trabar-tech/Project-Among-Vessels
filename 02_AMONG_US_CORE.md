@@ -348,6 +348,13 @@ a bot that collapses them into one number becomes trivially manipulable and triv
 | **Crew (eject)** | All impostors dead | `PLAY` and `EJECTION` | `GAME_OVER_CREW_EJECT_WIN` |
 | **Impostor (parity)** | `alive_impostors ≥ alive_crewmates` | `PLAY` and `EJECTION` | `GAME_OVER_IMPOSTOR_PARITY` |
 | **Impostor (sabotage)** | Crisis countdown expires | `PLAY` only | `GAME_OVER_IMPOSTOR_SABOTAGE` |
+| **Crew (clean manifest)** | Every illegal passenger has an anomaly on record | `PLAY` / `EJECTION` | `GAME_OVER_CREW_CLEAN_MANIFEST` |
+
+**Identity sub-phase (v0.2.0).** `MANIFEST_CHECK` is a *sub-phase of PLAY* entered when a player uses
+a manifest terminal: it pauses nothing, but it changes what the player knows. It exists as a phase so
+that the state machine can express "an information-gathering beat that the AI must plan around".
+The clean-manifest win (below) is the crew's fourth route to victory and the only one that requires no
+killing. See [06_IDENTITY_AND_PASSING.md](06_IDENTITY_AND_PASSING.md).
 
 **Notes and edge cases.**
 - Parity is `≥`, not `>`. At 2 crew vs 2 impostors the impostors win, because the crew can no longer

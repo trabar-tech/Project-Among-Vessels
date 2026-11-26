@@ -1,92 +1,307 @@
 {
-  "version": "0.1.0",
-  "status": "locked-for-phase-2",
+  "version": "0.2.0",
+  "status": "locked-for-phase-3",
   "description": "Single source of truth for the Quick-Chat grammar. Consumed by tools/qc_parse.py and mirrored in prose in 05_QUICKCHAT_GRAMMAR.md. If this file and the doc disagree, this file wins for tooling and the doc must be fixed.",
   "vocabularies": {
-    "LOCATIONS": ["Cafeteria", "Electrical", "MedBay", "Reactor", "O2", "Admin", "Security", "Storage", "UpperEngine", "LowerEngine", "Navigation", "Shields", "Weapons", "Corridor"],
-    "EVIDENCE": ["VENT", "BODY_NEAR", "TASK_FAKE", "SABOTAGE_NEAR", "SEEN_NEAR_BODY", "NO_ALIBI", "INCONSISTENT_STORY", "VISUAL_TASK", "CAMERA", "DOORLOG", "NONE"],
-    "TIME": ["JUST_NOW", "EARLIER", "LAST_ROUND", "UNKNOWN"],
-    "STRENGTH": ["MILD", "STRONG"],
-    "STATUS": ["DONE", "DOING", "NOT_DONE"],
-    "TOPIC": ["WHERE", "WHO", "WAS", "TASK"],
-    "SABOTAGE": ["LIGHTS", "REACTOR", "O2", "COMMS", "DOORS"],
-    "TASKS": ["FixWiring", "SwipeCard", "ClearAsteroids", "SubmitScan", "FuelEngines", "InspectSample", "StartReactor", "UploadData", "PrimeShields", "StabilizeSteering", "CalibrateDistributor", "CleanO2Filter", "UnlockManifolds", "AlignEngineOutput", "EmptyGarbage"]
+    "LOCATIONS": [
+      "Cafeteria",
+      "Electrical",
+      "MedBay",
+      "Reactor",
+      "O2",
+      "Admin",
+      "Security",
+      "Storage",
+      "UpperEngine",
+      "LowerEngine",
+      "Navigation",
+      "Shields",
+      "Weapons",
+      "Corridor"
+    ],
+    "EVIDENCE": [
+      "VENT",
+      "BODY_NEAR",
+      "TASK_FAKE",
+      "SABOTAGE_NEAR",
+      "SEEN_NEAR_BODY",
+      "NO_ALIBI",
+      "INCONSISTENT_STORY",
+      "VISUAL_TASK",
+      "CAMERA",
+      "DOORLOG",
+      "NONE",
+      "BADGE_MISMATCH",
+      "MANIFEST_GAP",
+      "NO_WORK_ORDER",
+      "SEAL_TAMPER"
+    ],
+    "TIME": [
+      "JUST_NOW",
+      "EARLIER",
+      "LAST_ROUND",
+      "UNKNOWN"
+    ],
+    "STRENGTH": [
+      "MILD",
+      "STRONG"
+    ],
+    "STATUS": [
+      "DONE",
+      "DOING",
+      "NOT_DONE"
+    ],
+    "TOPIC": [
+      "WHERE",
+      "WHO",
+      "WAS",
+      "TASK"
+    ],
+    "SABOTAGE": [
+      "LIGHTS",
+      "REACTOR",
+      "O2",
+      "COMMS",
+      "DOORS"
+    ],
+    "TASKS": [
+      "FixWiring",
+      "SwipeCard",
+      "ClearAsteroids",
+      "SubmitScan",
+      "FuelEngines",
+      "InspectSample",
+      "StartReactor",
+      "UploadData",
+      "PrimeShields",
+      "StabilizeSteering",
+      "CalibrateDistributor",
+      "CleanO2Filter",
+      "UnlockManifolds",
+      "AlignEngineOutput",
+      "EmptyGarbage"
+    ],
+    "ROLES": [
+      "TECH",
+      "MEDIC",
+      "SECURITY",
+      "ENGINEER",
+      "QUARTERMASTER",
+      "NAVIGATOR",
+      "SANITATION"
+    ],
+    "CLEARANCE": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "BERTHS": [
+      "DECK_A",
+      "DECK_B",
+      "DECK_C",
+      "HOLD_LOWER",
+      "MED_WING"
+    ]
   },
   "utterance_types": {
     "REPORT_BODY": {
-      "slots": {"LOCATION": "required", "TIME": "optional"},
-      "suspicion": {"default_target_delta": 0.0, "note": "Report itself is neutral; it triggers location/time memory, not suspicion."},
+      "slots": {
+        "LOCATION": "required",
+        "TIME": "optional"
+      },
+      "suspicion": {
+        "default_target_delta": 0.0,
+        "note": "Report itself is neutral; it triggers location/time memory, not suspicion."
+      },
       "render": "{SPEAKER} found a body in {LOCATION} ({TIME})."
     },
     "ACCUSE": {
-      "slots": {"TARGET": "required", "EVIDENCE": "required"},
-      "suspicion": {"default_target_delta": 0.3, "note": "Applied to TARGET, scaled by speaker trust at runtime."},
+      "slots": {
+        "TARGET": "required",
+        "EVIDENCE": "required"
+      },
+      "suspicion": {
+        "default_target_delta": 0.3,
+        "note": "Applied to TARGET, scaled by speaker trust at runtime."
+      },
       "render": "{SPEAKER} accuses {TARGET}: {EVIDENCE}."
     },
     "DEFEND": {
-      "slots": {"TARGET": "required", "EVIDENCE": "optional"},
-      "suspicion": {"default_target_delta": -0.1, "note": "Applied to TARGET (often self)."},
+      "slots": {
+        "TARGET": "required",
+        "EVIDENCE": "optional"
+      },
+      "suspicion": {
+        "default_target_delta": -0.1,
+        "note": "Applied to TARGET (often self)."
+      },
       "render": "{SPEAKER} defends {TARGET} ({EVIDENCE})."
     },
     "ALIBI": {
-      "slots": {"LOCATION": "required", "TIME": "required", "TARGET": "optional"},
-      "suspicion": {"default_target_delta": -0.15, "note": "Applied to SPEAKER; TARGET is an optional witness."},
+      "slots": {
+        "LOCATION": "required",
+        "TIME": "required",
+        "TARGET": "optional"
+      },
+      "suspicion": {
+        "default_target_delta": -0.15,
+        "note": "Applied to SPEAKER; TARGET is an optional witness."
+      },
       "render": "{SPEAKER} was in {LOCATION} at {TIME} with {TARGET}."
     },
     "TASK_CLAIM": {
-      "slots": {"TASKS": "required", "LOCATION": "required", "STATUS": "required"},
-      "suspicion": {"default_target_delta": 0.0, "note": "Neutral alone; verifiable against task log / visual-task witnesses."},
+      "slots": {
+        "TASKS": "required",
+        "LOCATION": "required",
+        "STATUS": "required"
+      },
+      "suspicion": {
+        "default_target_delta": 0.0,
+        "note": "Neutral alone; verifiable against task log / visual-task witnesses."
+      },
       "render": "{SPEAKER} claims {TASKS} in {LOCATION} is {STATUS}."
     },
     "SUSPICION": {
-      "slots": {"TARGET": "required", "STRENGTH": "required"},
-      "suspicion": {"default_target_delta": 0.2, "note": "MILD=0.1, STRONG=0.35 at runtime; base here is the MILD value."},
+      "slots": {
+        "TARGET": "required",
+        "STRENGTH": "required"
+      },
+      "suspicion": {
+        "default_target_delta": 0.2,
+        "note": "MILD=0.1, STRONG=0.35 at runtime; base here is the MILD value."
+      },
       "render": "{SPEAKER} is suspicious of {TARGET} ({STRENGTH})."
     },
     "VENT_SIGHTING": {
-      "slots": {"TARGET": "required", "LOCATION": "required"},
-      "suspicion": {"default_target_delta": 0.85, "note": "Near-conclusive unless Engineer role exists; see 02_AMONG_US_CORE.md §7."},
+      "slots": {
+        "TARGET": "required",
+        "LOCATION": "required"
+      },
+      "suspicion": {
+        "default_target_delta": 0.85,
+        "note": "Near-conclusive unless Engineer role exists; see 02_AMONG_US_CORE.md \u00a77."
+      },
       "render": "{SPEAKER} saw {TARGET} vent in {LOCATION}."
     },
     "SABOTAGE_WITNESS": {
-      "slots": {"SABOTAGE": "required", "LOCATION": "required", "TARGET": "optional"},
-      "suspicion": {"default_target_delta": 0.25, "note": "Applied to TARGET if present, else neutral location memory."},
+      "slots": {
+        "SABOTAGE": "required",
+        "LOCATION": "required",
+        "TARGET": "optional"
+      },
+      "suspicion": {
+        "default_target_delta": 0.25,
+        "note": "Applied to TARGET if present, else neutral location memory."
+      },
       "render": "{SPEAKER} witnessed {SABOTAGE} sabotage in {LOCATION} near {TARGET}."
     },
     "KILL_WITNESS": {
-      "slots": {"TARGET": "required", "LOCATION": "required"},
-      "suspicion": {"default_target_delta": 0.9, "note": "Direct witness; highest single-utterance weight."},
+      "slots": {
+        "TARGET": "required",
+        "LOCATION": "required"
+      },
+      "suspicion": {
+        "default_target_delta": 0.9,
+        "note": "Direct witness; highest single-utterance weight."
+      },
       "render": "{SPEAKER} saw {TARGET} kill in {LOCATION}."
     },
     "CLEAR": {
-      "slots": {"TARGET": "required", "EVIDENCE": "required"},
-      "suspicion": {"default_target_delta": -0.4, "note": "Hard-clear claim (e.g. VISUAL_TASK). Verifiable; false CLEAR is heavily penalised."},
+      "slots": {
+        "TARGET": "required",
+        "EVIDENCE": "required"
+      },
+      "suspicion": {
+        "default_target_delta": -0.4,
+        "note": "Hard-clear claim (e.g. VISUAL_TASK). Verifiable; false CLEAR is heavily penalised."
+      },
       "render": "{SPEAKER} clears {TARGET}: {EVIDENCE}."
     },
     "VOTE_INTENT": {
-      "slots": {"TARGET": "optional"},
-      "suspicion": {"default_target_delta": 0.0, "note": "Declares intent; no direct delta. TARGET omitted = SKIP."},
+      "slots": {
+        "TARGET": "optional"
+      },
+      "suspicion": {
+        "default_target_delta": 0.0,
+        "note": "Declares intent; no direct delta. TARGET omitted = SKIP."
+      },
       "render": "{SPEAKER} will vote {TARGET}."
     },
     "AGREE": {
-      "slots": {"TARGET": "required"},
-      "suspicion": {"default_target_delta": 0.0, "note": "Endorses TARGET's last claim; amplifies that claim's delta by 1.25x at runtime."},
+      "slots": {
+        "TARGET": "required"
+      },
+      "suspicion": {
+        "default_target_delta": 0.0,
+        "note": "Endorses TARGET's last claim; amplifies that claim's delta by 1.25x at runtime."
+      },
       "render": "{SPEAKER} agrees with {TARGET}."
     },
     "DISAGREE": {
-      "slots": {"TARGET": "required"},
-      "suspicion": {"default_target_delta": 0.0, "note": "Rejects TARGET's last claim; dampens that claim's delta by 0.5x at runtime."},
+      "slots": {
+        "TARGET": "required"
+      },
+      "suspicion": {
+        "default_target_delta": 0.0,
+        "note": "Rejects TARGET's last claim; dampens that claim's delta by 0.5x at runtime."
+      },
       "render": "{SPEAKER} disagrees with {TARGET}."
     },
     "QUESTION": {
-      "slots": {"TARGET": "required", "TOPIC": "required"},
-      "suspicion": {"default_target_delta": 0.0, "note": "Elicits a response utterance from TARGET; no direct delta."},
+      "slots": {
+        "TARGET": "required",
+        "TOPIC": "required"
+      },
+      "suspicion": {
+        "default_target_delta": 0.0,
+        "note": "Elicits a response utterance from TARGET; no direct delta."
+      },
       "render": "{SPEAKER} asks {TARGET}: {TOPIC}?"
     },
     "EMERGENCY_CALL": {
-      "slots": {"EVIDENCE": "optional"},
-      "suspicion": {"default_target_delta": 0.0, "note": "Calls a meeting; caller gains slight trust, loses if no evidence follows."},
+      "slots": {
+        "EVIDENCE": "optional"
+      },
+      "suspicion": {
+        "default_target_delta": 0.0,
+        "note": "Calls a meeting; caller gains slight trust, loses if no evidence follows."
+      },
       "render": "{SPEAKER} calls an emergency meeting ({EVIDENCE})."
+    },
+    "IDENTITY_CLAIM": {
+      "slots": {
+        "ROLE": "required",
+        "CLEARANCE": "optional",
+        "BERTH": "optional"
+      },
+      "suspicion": {
+        "default_target_delta": -0.05,
+        "note": "Claims reduce suspicion on SPEAKER slightly, but create a falsifiable record. Manifest terminals can refute it."
+      },
+      "render": "{SPEAKER} is {ROLE} (clearance {CLEARANCE}, berth {BERTH})."
+    },
+    "IDENTITY_CHALLENGE": {
+      "slots": {
+        "TARGET": "required",
+        "EVIDENCE": "required"
+      },
+      "suspicion": {
+        "default_target_delta": 0.45,
+        "note": "Second-highest weight after a kill sighting. Only BADGE_MISMATCH/SEAL_TAMPER/NO_WORK_ORDER are legal challenge tokens."
+      },
+      "render": "{SPEAKER} challenges {TARGET}'s identity: {EVIDENCE}."
+    },
+    "MANIFEST_CITE": {
+      "slots": {
+        "TARGET": "required",
+        "EVIDENCE": "required"
+      },
+      "suspicion": {
+        "default_target_delta": 0.5,
+        "note": "Bureaucratic evidence: the record itself contradicts the person. Verifiable at any manifest terminal."
+      },
+      "render": "{SPEAKER} cites the manifest against {TARGET}: {EVIDENCE}."
     }
   },
   "constraints": {
@@ -95,6 +310,17 @@
     "meeting_cooldown_seconds": 5,
     "lie_penalty_multiplier": 2.0,
     "agree_amplifier": 1.25,
-    "disagree_dampener": 0.5
+    "disagree_dampener": 0.5,
+    "identity_challenge_tokens": [
+      "BADGE_MISMATCH",
+      "SEAL_TAMPER",
+      "NO_WORK_ORDER",
+      "MANIFEST_GAP"
+    ],
+    "manifest_tokens": [
+      "MANIFEST_GAP",
+      "NO_WORK_ORDER",
+      "BADGE_MISMATCH"
+    ]
   }
 }
