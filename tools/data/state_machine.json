@@ -1,0 +1,29 @@
+{
+  "version": "0.1.0",
+  "status": "locked-for-phase-2",
+  "description": "Game phase state machine. Consumed by tools/validate_state.py. Mirrored in prose in 02_AMONG_US_CORE.md §3.",
+  "phases": ["LOBBY", "BRIEFING", "PLAY", "MEETING_DISCUSSION", "MEETING_VOTING", "EJECTION", "GAME_OVER_CREW_TASK_WIN", "GAME_OVER_CREW_EJECT_WIN", "GAME_OVER_IMPOSTOR_PARITY", "GAME_OVER_IMPOSTOR_SABOTAGE"],
+  "terminal_phases": ["GAME_OVER_CREW_TASK_WIN", "GAME_OVER_CREW_EJECT_WIN", "GAME_OVER_IMPOSTOR_PARITY", "GAME_OVER_IMPOSTOR_SABOTAGE"],
+  "initial_phase": "LOBBY",
+  "transitions": [
+    {"from": "LOBBY", "to": "BRIEFING", "guard": "player_count >= 4 and impostor_count >= 1 and impostor_count < player_count / 2"},
+    {"from": "BRIEFING", "to": "PLAY", "guard": "roles_assigned and tasks_assigned"},
+    {"from": "PLAY", "to": "MEETING_DISCUSSION", "guard": "body_reported or emergency_button_pressed"},
+    {"from": "PLAY", "to": "GAME_OVER_CREW_TASK_WIN", "guard": "all_crewmate_tasks_complete"},
+    {"from": "PLAY", "to": "GAME_OVER_IMPOSTOR_PARITY", "guard": "alive_impostors >= alive_crewmates"},
+    {"from": "PLAY", "to": "GAME_OVER_IMPOSTOR_SABOTAGE", "guard": "crisis_countdown_expired"},
+    {"from": "MEETING_DISCUSSION", "to": "MEETING_VOTING", "guard": "discussion_timer_expired"},
+    {"from": "MEETING_VOTING", "to": "EJECTION", "guard": "voting_timer_expired or all_votes_cast"},
+    {"from": "EJECTION", "to": "PLAY", "guard": "no_ejection_or_ejected_player_not_last_impostor"},
+    {"from": "EJECTION", "to": "GAME_OVER_CREW_EJECT_WIN", "guard": "alive_impostors == 0"},
+    {"from": "EJECTION", "to": "GAME_OVER_IMPOSTOR_PARITY", "guard": "alive_impostors >= alive_crewmates"}
+  ],
+  "invariants": [
+    "alive_impostors < player_count",
+    "alive_crewmates + alive_impostors == alive_players",
+    "kill_cooldown >= 10",
+    "sabotage_cooldown >= 10",
+    "discussion_seconds >= 0",
+    "voting_seconds >= 15"
+  ]
+}
